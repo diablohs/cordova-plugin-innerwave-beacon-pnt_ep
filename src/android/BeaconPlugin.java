@@ -88,8 +88,11 @@ public class BeaconPlugin extends CordovaPlugin {
     private boolean startFlag = false;
     private boolean agreeFlag = false;
 
+    private CallbackContext staticCallbackContext;
+
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+        staticCallbackContext = callbackContext;
         if (action.equals("initBeacon")) {
             agreeFlag = true;
             this.initBeacon(callbackContext);
@@ -203,6 +206,19 @@ public class BeaconPlugin extends CordovaPlugin {
                 }
             }else{
                 startFlag = true;
+                JSONObject json = new JSONObject();
+
+                try{                    
+                    json.put("result", "success");
+                    staticCallbackContext.success(json.toString());
+                }catch (JSONException e) {
+                    Log.e("BEACONPlugin", e.toString());
+                    try {
+                        json.put("result", "fail");
+                        json.put("message", e.toString());
+                    }catch (JSONException ex) {}
+                    staticCallbackContext.error(json.toString());
+                }
             }
         }
     }
@@ -285,8 +301,8 @@ public class BeaconPlugin extends CordovaPlugin {
 
     private void initBeacon(CallbackContext callbackContext) {
         JSONObject json = new JSONObject();
-        PnTDebug.FILE_LOG = true; 
-        PnTDebug.LOG_ALL = true;
+        // PnTDebug.FILE_LOG = true; 
+        // PnTDebug.LOG_ALL = true;
         
         checkBluetooth();
         checkPermissions();
@@ -299,7 +315,7 @@ public class BeaconPlugin extends CordovaPlugin {
             }catch (JSONException ex) {}
             callbackContext.error(json.toString());
         }
-        callbackContext.success(json.toString());
+        // callbackContext.success(json.toString());
     }
 
     private void startBeacon(String message, CallbackContext callbackContext) {
